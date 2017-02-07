@@ -1,0 +1,130 @@
+<html>
+<head>
+    <meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"> <!-- for bootstrap magic -->
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Ishmam's Chat App</title>
+	<!-- Custom CSS -->
+
+	<!-- Custom CSS -->
+        <link rel="stylesheet" href="chatstyles.css">
+        <link href="/chatstyles.css" type="text/css" rel="stylesheet" />
+        
+	<!-- Google Fonts -->
+        <link href='https://fonts.googleapis.com/css?family=Oswald:400,700' rel='stylesheet' type='text/css'>
+	<!-- Google Fonts -->
+        <link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
+        <!-- jQuery JS -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<!-- BootStrap JS -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<!-- BootStrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/superhero/bootstrap.min.css">
+	<!-- Icon -->    
+	<link rel="icon"  type="image/png" href="logo.png">
+	<!-- Socket IO + Font Awesome -->
+        <script src="https://use.fontawesome.com/8b04f0f4d5.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+	<!-- Custom Script JS -->
+    <style>
+        html, body {
+    margin: 0;
+    height: 100%;
+        }
+        h1{
+            text-align: center;
+            font-family: 'lobster', cursive;
+            font-size: 60px;    
+            }
+        .container{
+            padding-top: 60px;
+        }
+        #main{
+            background: url();
+        }
+        #messageArea{
+            display: none;
+        }
+        
+    </style>
+    <script>
+    $(function(){
+        var socket = io.connect(); 
+        var $messageForm = $('#messageForm');
+        var $message = $('#message');
+        var $chat = $('#chat');
+        var $messageArea = $('#messageArea');
+        var $userFormArea = $('#userFormArea');
+        var $userForm = $('#userForm');
+        var $users = $('#users');
+        var $username = $('#username');
+        $messageForm.submit(function(e){
+            e.preventDefault();
+            socket.emit('send message', $message.val());
+            $message.val('');
+        });
+         socket.on('new message', function(data){
+           $chat.append('<div class = "well"><strong>'+data.user+'</strong>: ' + data.msg + '</div>'); 
+        });
+        $userForm.submit(function(e){
+            e.preventDefault();
+            socket.emit('new user', $username.val(), function(data){
+                if(data){
+                    $userFormArea.hide();
+                    $messageArea.show();
+                }
+            });
+            $username.val('');
+        });
+        
+        socket.on('get users', function(data){
+            var html = '';
+            for(i=0; i < data.length; i++){
+                html += '<li class = "list-group-item">' + data[i] + '</li>';
+            }
+            $users.html(html);
+        });
+    });
+    </script>
+</head>
+<body>
+<h1>Quick Chat  <i class="fa fa-commenting-o" aria-hidden="true"></i></h1>
+    
+<div id = "main" class = "container">
+    <div id="userFormArea" class="row">
+        <div class="col-md-12">
+            <form id = "userForm">
+                <div class = "form-group">
+                <label>Enter Username</label>
+                <input class= "form-control" id="username"/>
+                    <br />
+                    <input type="submit" class="btn btn-primary" value="Login" />
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class = "row" id = "messageArea">
+        <div class = "col-md-4">
+            <div class = "well">
+                <h3>Online Users</h3>
+                <ul class = "list-group" id = "users"></ul>
+            </div>
+        
+        </div>
+        <div class = "col-md-8">
+            <div class = "chat" id = "chat"></div>
+            <form id = "messageForm">
+                <div class = "form-group">
+                <label>Enter Message</label>
+                <textarea class= "form-control" id="message"></textarea>
+                    <br />
+                    <input type="submit" class="btn btn-primary" value="Send Message" />
+                </div>
+            </form>
+        </div>
+        
+    </div>
+</div>
+
+</body>
+</html>
